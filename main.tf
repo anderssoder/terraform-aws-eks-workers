@@ -172,7 +172,6 @@ module "autoscale_group" {
   default_cooldown                                          = "${var.default_cooldown}"
   force_delete                                              = "${var.force_delete}"
   termination_policies                                      = "${var.termination_policies}"
-  suspended_processes                                       = "${var.suspended_processes}"
   placement_group                                           = "${var.placement_group}"
   enabled_metrics                                           = ["${var.enabled_metrics}"]
   metrics_granularity                                       = "${var.metrics_granularity}"

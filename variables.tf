@@ -212,12 +212,6 @@ variable "termination_policies" {
   default     = ["Default"]
 }
 
-variable "suspended_processes" {
-  type        = "list"
-  description = "A list of processes to suspend for the AutoScaling Group. The allowed values are `Launch`, `Terminate`, `HealthCheck`, `ReplaceUnhealthy`, `AZRebalance`, `AlarmNotification`, `ScheduledActions`, `AddToLoadBalancer`. Note that if you suspend either the `Launch` or `Terminate` process types, it can prevent your autoscaling group from functioning properly."
-  default     = []
-}
-
 variable "placement_group" {
   type        = "string"
   description = "The name of the placement group into which you'll launch your instances, if any"
