@@ -429,7 +429,7 @@ variable "cfn_deletion_policy" {
 }
 
 variable "hyperkubeimage" {
-  default = "googlecontainer/hyperkube-amd64"
+  default = "googlecontainer/hyperkube-amd64:v1.13.3"
 }
 
 variable "aws_cli_image" {
