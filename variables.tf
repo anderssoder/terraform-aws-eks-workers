@@ -442,9 +442,9 @@ variable "region" {
 }
 
 variable "node_drain_enabled" {
-  string  = "Wheter node drain should be enabled on node group updates"
-  default = "true"
-  type    = "string"
+  description = "Whether node drain should be enabled on node group updates"
+  default     = "false"
+  type        = "string"
 }
 
 variable "node_encryption_enabled" {
