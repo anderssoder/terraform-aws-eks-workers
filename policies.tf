@@ -63,6 +63,7 @@ resource "aws_iam_policy" "worker_node_main_policy" {
           "Effect": "Allow",
           "Resource": "${module.autoscale_group.cloudformation_stack_id}/*"
         },
+        {
           "Action": "autoscaling:Describe*",
           "Effect": "Allow",
           "Resource": [ "*" ]
@@ -71,7 +72,7 @@ resource "aws_iam_policy" "worker_node_main_policy" {
           "Action": [
             "autoscaling:DescribeAutoScalingGroups",
             "autoscaling:DescribeAutoScalingInstances",
-            "autoscaling:DescribeTags",
+            "autoscaling:DescribeTags"
           ],
           "Effect": "Allow",
           "Resource": "*"

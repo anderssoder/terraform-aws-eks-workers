@@ -1,5 +1,5 @@
 kind: DaemonSet
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 metadata:
   name: kube-node-drainer-asg-ds
   namespace: kube-system
@@ -38,9 +38,9 @@ spec:
         image: ${aws_cli_image}
         env:
         - name: NODE_NAME
-        valueFrom:
-          fieldRef:
-          fieldPath: spec.nodeName
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
         command:
         - /bin/sh
         - -xec
@@ -83,5 +83,5 @@ spec:
         - mountPath: /opt/bin
           name: workdir
       volumes:
-      - name: workdir
-        emptyDir: {}
+        - name: workdir
+          emptyDir: {}
