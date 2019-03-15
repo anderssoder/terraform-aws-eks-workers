@@ -174,6 +174,7 @@ module "autoscale_group" {
   cfn_update_policy_suspended_processes                     = "${var.cfn_update_policy_suspended_processes}"
   cfn_update_policy_wait_on_resource_signals                = "${var.cfn_update_policy_wait_on_resource_signals}"
   cfn_deletion_policy                                       = "${var.cfn_deletion_policy}"
+  node_drain_enabled                                        = "${var.node_drain_enabled}"
 }
 
 data "template_file" "userdata" {
