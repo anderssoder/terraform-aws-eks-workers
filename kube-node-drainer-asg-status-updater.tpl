@@ -51,7 +51,7 @@ spec:
           kubectl() { /lib/ld-musl-x86_64.so.1 /opt/bin/hyperkube kubectl "$@"; }
 
           REGION=$(metadata dynamic/instance-identity/document | jq -r .region)
-          [ -n "\$${REGION}" ]
+          [ -n "$${REGION}" ]
 
           # Not customizable, for now
           POLL_INTERVAL=10
@@ -61,19 +61,19 @@ spec:
           instances_to_drain='-'
 
           # Instance termination detection loop
-          while sleep \$${POLL_INTERVAL}; do
+          while sleep $${POLL_INTERVAL}; do
 
             # Fetch the list of instances being terminated by their respective ASGs
             updated_instances_to_drain=$(asg describe-auto-scaling-groups | jq -r '[.AutoScalingGroups[] | select((.Tags[].Key | contains("EKS")) and (.Tags[].Key | contains("kubernetes.io/cluster/${cluster_name}"))) | .Instances[] | select(.LifecycleState == "Terminating:Wait") | .InstanceId] | sort | join(",")')
 
             # Have things changed since last iteration?
-            if [ "\$${updated_instances_to_drain}" == "\$${instances_to_drain}" ]; then
+            if [ "$${updated_instances_to_drain}" == "$${instances_to_drain}" ]; then
             continue
             fi
-            instances_to_drain="\$${updated_instances_to_drain}"
+            instances_to_drain="$${updated_instances_to_drain}"
 
             # Update ConfigMap to reflect current ASG state
-            echo "{\"apiVersion\": \"v1\", \"kind\": \"ConfigMap\", \"metadata\": {\"name\": \"kube-node-drainer-status\"}, \"data\": {\"asg\": \"\$${instances_to_drain}\"}}" | kubectl -n kube-system apply -f -
+            echo "{\"apiVersion\": \"v1\", \"kind\": \"ConfigMap\", \"metadata\": {\"name\": \"kube-node-drainer-status\"}, \"data\": {\"asg\": \"$${instances_to_drain}\"}}" | kubectl -n kube-system apply -f -
           done
         volumeMounts:
         - mountPath: /opt/bin
