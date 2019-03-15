@@ -444,11 +444,13 @@ variable "region" {
 variable "node_drain_enabled" {
   string  = "Wheter node drain should be enabled on node group updates"
   default = "true"
+  type    = "string"
 }
 
 variable "node_encryption_enabled" {
   description = "Used to toggle encryption. If enable also need to provide kms_key_arn"
   default     = "false"
+  type        = "string"
 }
 
 variable "kms_key_arn" {
