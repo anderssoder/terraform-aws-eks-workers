@@ -1,5 +1,5 @@
 locals {
-  moduletags = "${merge(map("kubernetes.io/cluster/${var.cluster_name}", "owned"), map("EKS:","true"))}"
+  moduletags = "${merge(map("kubernetes.io/cluster/${var.cluster_name}", "owned"), map("EKS","true"))}"
   tags       = "${merge(var.tags, local.moduletags)}"
 }
 
