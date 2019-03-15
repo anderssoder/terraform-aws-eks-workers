@@ -43,7 +43,7 @@ spec:
         - -xec
         - |
           metadata() { curl -s -S -f http://169.254.169.254/2016-09-02/"$1"; }
-          asg()      { aws --region="${REGION}" autoscaling "$@"; }
+          asg()      { aws --region="$${REGION}" autoscaling "$@"; }
 
           # Hyperkube binary is not statically linked, so we need to use
           # the musl interpreter to be able to run it in this image

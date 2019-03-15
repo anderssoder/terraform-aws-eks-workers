@@ -48,7 +48,7 @@ spec:
         - /bin/sh
         - -xec
         - |
-          metadata() { wget -O - -q http://169.254.169.254/2016-09-02/"$1"; }
+          metadata() { curl -s -S -f http://169.254.169.254/2016-09-02/"$1"; }
           asg()      { aws --region="$${REGION}" autoscaling "$@"; }
 
           # Hyperkube binary is not statically linked, so we need to use
@@ -60,7 +60,32 @@ spec:
           REGION=$(metadata dynamic/instance-identity/document | jq -r .region)
           [ -n "$${REGION}" ]
 
-          while sleep 30; do
+          # Not customizable, for now
+          POLL_INTERVAL=10
+
+          # Used to identify the source which requested the instance termination
+          termination_source=''
+
+          # Instance termination detection loop
+          while sleep ${POLL_INTERVAL}; do
+
+            # Spot instance termination check
+            http_status=$(curl -o /dev/null -w '%{http_code}' -sL http://169.254.169.254/latest/meta-data/spot/termination-time)
+            if [ "$${http_status}" -eq 200 ]; then
+              termination_source=spot
+              break
+            fi
+
+            # Termination ConfigMap check
+            if [ -e /etc/kube-node-drainer/asg ] && grep -q "$${INSTANCE_ID}" /etc/kube-node-drainer/asg; then
+              termination_source=asg
+              break
+            fi
+          done
+
+          # Node draining loop
+          while true; do
+            echo Node is terminating, draining it...
             STATE=$(asg describe-auto-scaling-instances --region "$${REGION}" --instance-ids "$${INSTANCE_ID}" | jq -r '.AutoScalingInstances[].LifecycleState')
             if [ ! "$${STATE}" = Terminating:Wait ]; then
             continue
@@ -71,13 +96,16 @@ spec:
             echo Not all pods on this host can be evicted, will try again
             continue
             fi
+            echo All evictable pods are gone
+            
+            if [ "§${termination_source}" == asg ]; then
+              echo Notifying AutoScalingGroup that instance $${INSTANCE_ID} can be shutdown
+              ASG_NAME=$(asg describe-auto-scaling-instances --instance-ids "$${INSTANCE_ID}" | jq -r '.AutoScalingInstances[].AutoScalingGroupName')
+              HOOK_NAME=$(asg describe-lifecycle-hooks --auto-scaling-group-name "$${ASG_NAME}" | jq -r '.LifecycleHooks[].LifecycleHookName' | grep -i nodedrainer)
 
-            echo All evictable pods are gone, notifying AutoScalingGroup that instance $${INSTANCE_ID} can be shutdown
-            ASG_NAME=$(asg describe-auto-scaling-instances --instance-ids "$${INSTANCE_ID}" | jq -r '.AutoScalingInstances[].AutoScalingGroupName')
-            HOOK_NAME=$(asg describe-lifecycle-hooks --auto-scaling-group-name "$${ASG_NAME}" | jq -r '.LifecycleHooks[].LifecycleHookName' | grep -i nodedrainer)
-
-            echo Sending notification to ASG_NAME=$${ASG_NAME} HOOK_NAME=$${HOOK_NAME}
-            asg complete-lifecycle-action --lifecycle-action-result CONTINUE --instance-id "$${INSTANCE_ID}" --lifecycle-hook-name "$${HOOK_NAME}" --auto-scaling-group-name "$${ASG_NAME}"
+              echo Sending notification to ASG_NAME=$${ASG_NAME} HOOK_NAME=$${HOOK_NAME}
+              asg complete-lifecycle-action --lifecycle-action-result CONTINUE --instance-id "$${INSTANCE_ID}" --lifecycle-hook-name "$${HOOK_NAME}" --auto-scaling-group-name "$${ASG_NAME}"
+            fi
 
             # sleep 5 mins + 1 mins, expecting that instance will be shut down in this time
             sleep 300
@@ -85,6 +113,15 @@ spec:
         volumeMounts:
         - mountPath: /opt/bin
           name: workdir
+        - mountPath: /etc/kube-node-drainer
+          name: kube-node-drainer-status
+          readOnly: true
       volumes:
         - name: workdir
           emptyDir: {}
+        - name: kube-node-drainer-status
+          projected:
+            sources:
+            - configMap:
+                name: kube-node-drainer-status
+                optional: true  
