@@ -176,7 +176,7 @@ resource "aws_iam_policy" "node_encryption_policy" {
 EOF
 }
 
-resource "aws_iam_role_policy_attachment" "node_drain_policy" {
+resource "aws_iam_role_policy_attachment" "node_encryption_policy" {
   count      = "${var.enabled == "true" && var.node_encryption_enabled == "true" ? 1 : 0}"
   policy_arn = "${join("", aws_iam_policy.node_encryption_policy.*.arn)}"
   role       = "${join("", aws_iam_role.default.*.name)}"
