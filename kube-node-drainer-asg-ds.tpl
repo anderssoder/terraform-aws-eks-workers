@@ -70,7 +70,7 @@ spec:
           while sleep ${POLL_INTERVAL}; do
 
             # Spot instance termination check
-            http_status=$(curl -o /dev/null -w '%{http_code}' -sL http://169.254.169.254/latest/meta-data/spot/termination-time)
+            http_status=$(curl -o /dev/null -w '%%{http_code}' -sL http://169.254.169.254/latest/meta-data/spot/termination-time)
             if [ "$${http_status}" -eq 200 ]; then
               termination_source=spot
               break
