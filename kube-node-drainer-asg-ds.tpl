@@ -73,7 +73,7 @@ spec:
         ASG_NAME=$(asg describe-auto-scaling-instances --instance-ids "\$${INSTANCE_ID}" | jq -r '.AutoScalingInstances[].AutoScalingGroupName')
         HOOK_NAME=$(asg describe-lifecycle-hooks --auto-scaling-group-name "\$${ASG_NAME}" | jq -r '.LifecycleHooks[].LifecycleHookName' | grep -i nodedrainer)
 
-        echo Sending notification to ASG_NAME=${ASG_NAME} HOOK_NAME=${HOOK_NAME}
+        echo Sending notification to ASG_NAME=\$${ASG_NAME} HOOK_NAME=\$${HOOK_NAME}
         asg complete-lifecycle-action --lifecycle-action-result CONTINUE --instance-id "\$${INSTANCE_ID}" --lifecycle-hook-name "\$${HOOK_NAME}" --auto-scaling-group-name "\$${ASG_NAME}"
 
         # sleep 5 mins + 1 mins, expecting that instance will be shut down in this time
