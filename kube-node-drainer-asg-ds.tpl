@@ -67,7 +67,7 @@ spec:
           termination_source=''
 
           # Instance termination detection loop
-          while sleep ${POLL_INTERVAL}; do
+          while sleep $${POLL_INTERVAL}; do
 
             # Spot instance termination check
             http_status=$(curl -o /dev/null -w '%%{http_code}' -sL http://169.254.169.254/latest/meta-data/spot/termination-time)
@@ -98,7 +98,7 @@ spec:
             fi
             echo All evictable pods are gone
             
-            if [ "§${termination_source}" == asg ]; then
+            if [ "$${termination_source}" == asg ]; then
               echo Notifying AutoScalingGroup that instance $${INSTANCE_ID} can be shutdown
               ASG_NAME=$(asg describe-auto-scaling-instances --instance-ids "$${INSTANCE_ID}" | jq -r '.AutoScalingInstances[].AutoScalingGroupName')
               HOOK_NAME=$(asg describe-lifecycle-hooks --auto-scaling-group-name "$${ASG_NAME}" | jq -r '.LifecycleHooks[].LifecycleHookName' | grep -i nodedrainer)
