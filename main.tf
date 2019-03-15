@@ -207,6 +207,8 @@ data "template_file" "kube_node_drainer_asg_ds" {
     aws_cli_image  = "${var.aws_cli_image}"
     REGION         = "${var.region}"
   }
+
+  depends_on = ["module.autoscale_group"]
 }
 
 data "template_file" "kube_node_drainer_asg_status_updater" {
@@ -220,4 +222,6 @@ data "template_file" "kube_node_drainer_asg_status_updater" {
     aws_iam_role_arn = "${join("", aws_iam_role.default.*.arn)}"
     cluster_name     = "${var.cluster_name}"
   }
+
+  depends_on = ["module.autoscale_group"]
 }
