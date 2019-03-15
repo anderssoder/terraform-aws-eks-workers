@@ -6,6 +6,9 @@ metadata:
   labels:
     k8s-app: kube-node-drainer-asg-status-updater
 spec:
+  selector:
+    matchLabels:
+      k8s-app: kube-node-drainer-asg-status-updater
   replicas: 1
   template:
     metadata:

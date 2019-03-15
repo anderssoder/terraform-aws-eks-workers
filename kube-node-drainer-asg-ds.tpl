@@ -6,6 +6,9 @@ metadata:
   labels:
     k8s-app: kube-node-drainer-asg-ds
 spec:
+  selector:
+    matchLabels:
+      k8s-app: kube-node-drainer-asg-ds
   updateStrategy:
     type: RollingUpdate
   template:
