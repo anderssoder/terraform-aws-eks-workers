@@ -55,26 +55,26 @@ spec:
 
       INSTANCE_ID=$(metadata meta-data/instance-id)
       REGION=$(metadata dynamic/instance-identity/document | jq -r .region)
-      [ -n "${REGION}" ]
+      [ -n "\$${REGION}" ]
 
       while sleep 30; do
-        STATE=$(asg describe-auto-scaling-instances --region "${REGION}" --instance-ids "${INSTANCE_ID}" | jq -r '.AutoScalingInstances[].LifecycleState')
-        if [ ! "${STATE}" = Terminating:Wait ]; then
+        STATE=$(asg describe-auto-scaling-instances --region "\$${REGION}" --instance-ids "\$${INSTANCE_ID}" | jq -r '.AutoScalingInstances[].LifecycleState')
+        if [ ! "\$${STATE}" = Terminating:Wait ]; then
         continue
         fi
         echo Node is in Terminating:Wait state, draining it
 
-        if ! kubectl drain --ignore-daemonsets=true --delete-local-data=true --force=true --timeout=60s "${NODE_NAME}"; then
+        if ! kubectl drain --ignore-daemonsets=true --delete-local-data=true --force=true --timeout=60s "\$${NODE_NAME}"; then
         echo Not all pods on this host can be evicted, will try again
         continue
         fi
 
-        echo All evictable pods are gone, notifying AutoScalingGroup that instance ${INSTANCE_ID} can be shutdown
-        ASG_NAME=$(asg describe-auto-scaling-instances --instance-ids "${INSTANCE_ID}" | jq -r '.AutoScalingInstances[].AutoScalingGroupName')
-        HOOK_NAME=$(asg describe-lifecycle-hooks --auto-scaling-group-name "${ASG_NAME}" | jq -r '.LifecycleHooks[].LifecycleHookName' | grep -i nodedrainer)
+        echo All evictable pods are gone, notifying AutoScalingGroup that instance \$${INSTANCE_ID} can be shutdown
+        ASG_NAME=$(asg describe-auto-scaling-instances --instance-ids "\$${INSTANCE_ID}" | jq -r '.AutoScalingInstances[].AutoScalingGroupName')
+        HOOK_NAME=$(asg describe-lifecycle-hooks --auto-scaling-group-name "\$${ASG_NAME}" | jq -r '.LifecycleHooks[].LifecycleHookName' | grep -i nodedrainer)
 
         echo Sending notification to ASG_NAME=${ASG_NAME} HOOK_NAME=${HOOK_NAME}
-        asg complete-lifecycle-action --lifecycle-action-result CONTINUE --instance-id "${INSTANCE_ID}" --lifecycle-hook-name "${HOOK_NAME}" --auto-scaling-group-name "${ASG_NAME}"
+        asg complete-lifecycle-action --lifecycle-action-result CONTINUE --instance-id "\$${INSTANCE_ID}" --lifecycle-hook-name "\$${HOOK_NAME}" --auto-scaling-group-name "\$${ASG_NAME}"
 
         # sleep 5 mins + 1 mins, expecting that instance will be shut down in this time
         sleep 300
