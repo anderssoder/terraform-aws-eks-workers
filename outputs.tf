@@ -72,3 +72,13 @@ output "config_map_aws_auth" {
   description = "Kubernetes ConfigMap configuration for worker nodes to join the EKS cluster. https://www.terraform.io/docs/providers/aws/guides/eks-getting-started.html#required-kubernetes-configuration-to-join-worker-nodes"
   value       = "${join("", data.template_file.config_map_aws_auth.*.rendered)}"
 }
+
+output "kube_node_drainer_asg_ds" {
+  description = "Kubernetes daemonset to perform node draining"
+  value       = "${join("", data.template_file.kube_node_drainer_asg_ds.*.rendered)}"
+}
+
+output "kube_node_drainer_asg_status_updater" {
+  description = "Kubernetes deployment to update status when nodes are drained"
+  value       = "${join("", data.template_file.kube_node_drainer_asg_status_updater.*.rendered)}"
+}

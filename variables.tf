@@ -427,3 +427,31 @@ variable "cfn_deletion_policy" {
   description = "With the DeletionPolicy attribute you can preserve or (in some cases) backup a resource when its stack is deleted. You specify a DeletionPolicy attribute for each resource that you want to control. If a resource has no DeletionPolicy attribute, AWS CloudFormation deletes the resource by default. Allowed values: `Delete`, `Retain`, `Snapshot`"
   default     = "Retain"
 }
+
+variable "hyperkubeimage" {
+  default = "googlecontainer/hyperkube-amd64"
+}
+
+variable "aws_cli_image" {
+  default = "quay.io/coreos/awscli:master"
+}
+
+variable "region" {
+  description = "AWS region"
+  default     = "eu-central-1"
+}
+
+variable "node_drain_enabled" {
+  string  = "Wheter node drain should be enabled on node group updates"
+  default = "true"
+}
+
+variable "node_encryption_enabled" {
+  description = "Used to toggle encryption. If enable also need to provide kms_key_arn"
+  default     = "false"
+}
+
+variable "kms_key_arn" {
+  description = "KMS key used for encryption"
+  default     = ""
+}

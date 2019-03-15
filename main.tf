@@ -1,5 +1,6 @@
 locals {
-  tags = "${merge(var.tags, map("kubernetes.io/cluster/${var.cluster_name}", "owned"))}"
+  moduletags = "${merge(map("kubernetes.io/cluster/${var.cluster_name}", "owned"), map("EKS:","true"))}"
+  tags       = "${merge(var.tags, local.moduletags)}"
 }
 
 module "label" {
@@ -13,42 +14,10 @@ module "label" {
   enabled    = "${var.enabled}"
 }
 
-data "aws_iam_policy_document" "assume_role" {
-  count = "${var.enabled == "true" ? 1 : 0}"
-
-  statement {
-    effect  = "Allow"
-    actions = ["sts:AssumeRole"]
-
-    principals = {
-      type        = "Service"
-      identifiers = ["ec2.amazonaws.com"]
-    }
-  }
-}
-
 resource "aws_iam_role" "default" {
   count              = "${var.enabled == "true" ? 1 : 0}"
   name               = "${module.label.id}"
   assume_role_policy = "${join("", data.aws_iam_policy_document.assume_role.*.json)}"
-}
-
-resource "aws_iam_role_policy_attachment" "amazon_eks_worker_node_policy" {
-  count      = "${var.enabled == "true" ? 1 : 0}"
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
-  role       = "${join("", aws_iam_role.default.*.name)}"
-}
-
-resource "aws_iam_role_policy_attachment" "amazon_eks_cni_policy" {
-  count      = "${var.enabled == "true" ? 1 : 0}"
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
-  role       = "${join("", aws_iam_role.default.*.name)}"
-}
-
-resource "aws_iam_role_policy_attachment" "amazon_ec2_container_registry_read_only" {
-  count      = "${var.enabled == "true" ? 1 : 0}"
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
-  role       = "${join("", aws_iam_role.default.*.name)}"
 }
 
 resource "aws_iam_instance_profile" "default" {
@@ -225,5 +194,29 @@ data "template_file" "config_map_aws_auth" {
 
   vars {
     aws_iam_role_arn = "${join("", aws_iam_role.default.*.arn)}"
+  }
+}
+
+data "template_file" "kube_node_drainer_asg_ds" {
+  count    = "${var.enabled == "true" && var.node_drain_enabled == "true" ? 1 : 0}"
+  template = "${file("${path.module}/kube-node-drainer-asg-ds.tpl")}"
+
+  vars {
+    hyperkubeimage = "${var.hyperkubeimage}"
+    aws_cli_image  = "${var.aws_cli_image}"
+    REGION         = "${var.region}"
+  }
+}
+
+data "template_file" "kube_node_drainer_asg_status_updater" {
+  count    = "${var.enabled == "true" && var.node_drain_enabled == "true" ? 1 : 0}"
+  template = "${file("${path.module}/kube-node-drainer-asg-status-updater.tpl")}"
+
+  vars {
+    hyperkubeimage   = "${var.hyperkubeimage}"
+    aws_cli_image    = "${var.aws_cli_image}"
+    REGION           = "${var.region}"
+    aws_iam_role_arn = "${join("", aws_iam_role.default.*.arn)}"
+    cluster_name     = "${var.cluster_name}"
   }
 }
