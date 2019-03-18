@@ -10,6 +10,7 @@ rules:
     - create
     - update
     - get
+    - patch
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
