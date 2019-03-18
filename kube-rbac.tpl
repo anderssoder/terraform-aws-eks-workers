@@ -1,8 +1,15 @@
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: configmap-updater
+  name: node-extensions
 rules:
+  - apiGroups: [""]
+    resources: 
+    - nodes
+    verbs:
+    - get
+    - patch
+    - update
   - apiGroups: [""]
     resources: 
     - configmaps
@@ -11,11 +18,38 @@ rules:
     - update
     - get
     - patch
+  - apiGroups: ["extensions"]
+    resources:
+    - replicasets
+    verbs:
+    - get
+  - apiGroups: ["extensions"]
+    resources:
+    - daemonsets
+    verbs:
+    - get
+  - apiGroups: ["batch"]
+    resources:
+    - jobs
+    verbs:
+    - get
+  - apiGroups: [""]
+    resources:
+    - replicationcontrollers
+    verbs:
+    - get
+  - apiGroups: [""]
+    resources:
+    - pods/eviction
+    verbs:
+    - create
+  - nonResourceURLs: ["*"]
+    verbs: ["*"]
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: configmap-updater
+  name: node-extensions
 subjects:
   - kind: User
     name: system:serviceaccount:kube-system:default
@@ -23,5 +57,5 @@ subjects:
     name: system:nodes
 roleRef:
   kind: ClusterRole
-  name: configmap-updater
+  name: node-extensions
   apiGroup: rbac.authorization.k8s.io
