@@ -4,7 +4,7 @@ metadata:
   namespace: kube-system
   name: configmap-updater
 rules:
-- apiGroups: [""]
+  - apiGroups: [""]
   resources: ["configmaps"]
   verbs: ["create", "update", "get"]
 ---
