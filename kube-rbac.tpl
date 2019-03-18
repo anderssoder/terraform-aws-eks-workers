@@ -23,16 +23,19 @@ rules:
     - replicasets
     verbs:
     - get
+    - list
   - apiGroups: ["extensions"]
     resources:
     - daemonsets
     verbs:
     - get
+    - list
   - apiGroups: ["batch"]
     resources:
     - jobs
     verbs:
     - get
+    - list
   - apiGroups: [""]
     resources:
     - replicationcontrollers
@@ -48,6 +51,8 @@ rules:
     - pods
     verbs:
     - get
+    - list
+    - watch
   - nonResourceURLs: ["*"]
     verbs: ["*"]
 ---
