@@ -82,3 +82,8 @@ output "kube_node_drainer_asg_status_updater" {
   description = "Kubernetes deployment to update status when nodes are drained"
   value       = "${join("", data.template_file.kube_node_drainer_asg_status_updater.*.rendered)}"
 }
+
+output "kube_rbac" {
+  description = "Role and rolebinding to let node drainer work as needed."
+  value       = "${join("", data.template_file.kube_rbac.*.rendered)}"
+}

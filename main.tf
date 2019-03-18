@@ -225,3 +225,12 @@ data "template_file" "kube_node_drainer_asg_status_updater" {
 
   depends_on = ["module.autoscale_group"]
 }
+
+data "template_file" "kube_rbac" {
+  count    = "${var.enabled == "true" && var.node_drain_enabled == "true" ? 1 : 0}"
+  template = "${file("${path.module}/kube-rbac.tpl")}"
+
+  vars {}
+
+  depends_on = ["module.autoscale_group"]
+}
