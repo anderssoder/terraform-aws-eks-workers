@@ -43,6 +43,11 @@ rules:
     - pods/eviction
     verbs:
     - create
+  - apiGroups: [""]
+    resources:
+    - pods
+    verbs:
+    - get
   - nonResourceURLs: ["*"]
     verbs: ["*"]
 ---
