@@ -132,6 +132,7 @@ resource "aws_iam_policy" "node_drain_policy" {
   "Statement": [
     {
       "Action": [
+        "autoscaling:DescribeAutoScalingGroups",
         "autoscaling:DescribeAutoScalingInstances",
         "autoscaling:DescribeLifecycleHooks"
       ],
